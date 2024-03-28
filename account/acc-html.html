@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Account</title>
+    <link rel="stylesheet" href="acc-style.css">
+</head>
+
+<body>
+    <nav id="navBar">
+        <div id="accNo" class="navBar-item  accNo">HESAP NO</div> <!--Acc no-->
+        <div class="navBar-item  status">Active <span id="dot-icon">&#x2022</span></div> <!--Online-->
+        <div class="navBar-item  balance">Bakiye</div> <!--Balance-->
+    </nav>
+
+    <div id="transaction-container">
+        <div id="transaction-container-sideBar">
+            <button class="transaction-container-sideBar-items  invest-btn">Invest Money</button>
+            <button class="transaction-container-sideBar-items  withdraw-btn">Withdraw Money</button>
+            <button class="transaction-container-sideBar-items  transfer-btn">Money Transfer</button>
+            <button class="transaction-container-sideBar-items  request-btn">Request Money</button>
+            <button class="transaction-container-sideBar-items  sign-out-btn">Sign Out</button>
+        </div>
+        <div id="choosingBank">
+            <h5 id="choosingText">CLICK ON AN ACTION ON THE LEFT SIDE YOU WANT</h5>
+        </div>
+    </div>
+    
+    <div id="advertisement-div">
+        <p>VISIT SAMSUNG SHOP</p>
+        <a id="a-tag" href="https://wallet.gooddollar.org/">
+            <img src="./img/Galaxy S22 Ultra.jpg" id="images" 
+            href="https://www.samsung.com/us/smartphones/galaxy-s22-ultra/buy/galaxy-s22-ultra-128gb-unlocked-sm-s908udraxaa/?modelCode=SM-S908UZREXAA">
+        </a>
+    </div>
+   
+
+    <script src="acc-script.js"></script>
+</body>
+
+</html>

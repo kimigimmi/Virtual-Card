@@ -1,0 +1,128 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: #fff;
+    color: white;
+    font-weight: lighter;
+}
+
+#navBar{
+    background: black;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 100px;
+    height: 70px;
+    width: 100%;
+    font-size: 16px;
+    align-items: center;
+
+}
+
+.navBar-item{
+    padding-left: 50px;
+}
+
+#transaction-container{
+    width: 100%;
+    margin-top: 50px;
+    display: flex;
+}
+
+.transaction-container-sideBar-items{
+    margin-top: 30px;
+    padding: 15px 5px;
+    width: 100%;
+    color: #fff;
+    font-weight: bolder;
+    background: rgb(73 83 203);
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.transaction-container-sideBar-items:nth-child(1){
+    margin-top: 0;
+}
+
+.transaction-container-sideBar-items:hover {
+    background: rgba(46, 46, 46, 0.527);
+}
+
+#choosingBank{
+    background: rgb(73 83 203);
+    margin-left: 150px;
+    width: 60%;
+    position: relative;
+}
+
+.status{
+    display: flex;
+    align-items: center;
+}
+
+#dot-icon{
+    font-size: 35px;
+    color: rgb(7, 170, 7);
+    margin-left: 7px;
+}
+
+#choosingText{
+   position: absolute;
+   font-size: 20px;
+   left: 35%;
+   transform: translate(-27%);
+}
+
+#investingOrWithdrawingDiv, #transferingOrRequestingDiv{
+    position: absolute;
+    font-size: 20px;
+    top: 30%;
+    left: 30%;
+    transform: translate(-50%);
+}
+
+.input{
+    background: #e4cccc;
+    border-color: rgb(85, 61, 61);
+    color: black;
+    margin-top: 20px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.apply-btn{
+    background: rgb(20, 17, 71);
+    border-color: rgb(78, 50, 50);
+    border-radius: 5px;
+    color: #fff;
+    width: 30%;
+    padding: 8px 0;
+    font-size: 15px;
+    transform: translate(100%,50%);
+}
+
+.apply-btn:hover{
+    background: rgba(40, 60, 102, 0.527);
+}
+
+#advertisement-div{
+    margin-left: 81%; 
+    margin-top: -200px;
+}
+
+#images{
+    height: 250px;
+    width: 90%;
+}
+
+#advertisement-div p{
+    margin-left: 5%;
+    font-size: 20px;
+    color: black;
+    font-weight: bold;
+}
+
+

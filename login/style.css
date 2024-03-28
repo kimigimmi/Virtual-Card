@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: rgb(73 83 203);
+    color: #fff;
+    height: 80vh;
+    overflow: hidden;      /*  Scroll bar'ın çıkmasını engeller */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#largestDiv{
+    background: rgba(17, 6, 6, 0.527);
+    width: 30%;
+    font-size: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.fa-user-alt{
+   font-size: 100px;
+   transform: translate(170%,-10%);
+}
+
+.joint-password{
+    margin: 15px 0;
+}
+
+#btn-div{
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn{
+    width: 47%;
+    height: 30px;
+    background: rgb(0, 5, 48);
+    border-color: rgb(0, 0, 0);
+    border-radius: 5px;
+    color: #fff;
+    font-size: 15px;
+}
+
+.btn:hover{
+    background: rgba(46, 46, 46, 0.527);
+}
+
+.input{
+   width: 60%;
+   position: absolute;
+   right: 15px;
+   background: rgb(170 173 197);
+   border-color: rgb(37, 23, 23);
+   color: #000000;
+   font-weight: 600;
+   padding: 3px;
+   border-radius: 5px;
+}
+
+.colonUser{
+    margin-left: 10px;
+}
+
+.colonPass{
+    margin-left: 14px;
+}
+
+#username-signUp{
+    margin-top: 15px;
+}
+
