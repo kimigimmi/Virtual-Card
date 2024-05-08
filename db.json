@@ -1,0 +1,81 @@
+{
+  "users": [
+    {
+      "id": "9da8",
+      "username": "n",
+      "password": "n",
+      "online": true,
+      "accountNo": 7535096,
+      "balance": 186,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "c270",
+      "username": "x",
+      "password": "x",
+      "online": false,
+      "accountNo": 8177696,
+      "balance": 439,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "df6d",
+      "username": "c",
+      "password": "c",
+      "online": false,
+      "accountNo": 7223656,
+      "balance": 0,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "d030",
+      "username": "v",
+      "password": "v",
+      "online": false,
+      "accountNo": 5096227,
+      "balance": 0,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "d62e",
+      "username": "m",
+      "password": "x",
+      "online": false,
+      "accountNo": 138475,
+      "balance": 0,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "505d",
+      "username": "h",
+      "password": "c",
+      "online": false,
+      "accountNo": 707860,
+      "balance": 0,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    },
+    {
+      "id": "61e8",
+      "username": "enes",
+      "password": "123",
+      "online": false,
+      "accountNo": 1117656,
+      "balance": 0,
+      "isRequest": false,
+      "requestAmount": 0,
+      "requestAccNo": 0
+    }
+  ]
+}

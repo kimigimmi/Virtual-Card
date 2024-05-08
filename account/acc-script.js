@@ -1,82 +1,96 @@
-
 const transactionButtons = document.querySelectorAll('.transaction-container-sideBar-items');
 const accNoDiv = document.querySelectorAll('.navBar-item')[0];
 const balanceDiv = document.querySelector('.balance');
 const choosingBank = document.getElementById('choosingBank');
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  navbarDatas();
-  evenListeners();
-  isThereRequest();
-
-
-  function isThereRequest() {
-    const onlineUser = onlineUsers();
-    const hisName = 'a';
-    const requestAmount = parseFloat(onlineUser.requestAmount);
-    const hisAccNo = onlineUser.requestAccNo;     // who wants money
-
-    if (onlineUser.isRequest) {
-      if (confirm(`The user numbered ${hisAccNo} has sent you a ${requestAmount}$ money request.\nPress Ok or Cancel`)) {
-        if (onlineUser.balance < requestAmount) {
-          alert('Insufficient balance !!');
-        } else {
-          transferOrRequest(requestAmount, hisName, hisAccNo);
-          onlineUser.balance -= requestAmount;
-        }
-      }
-    }
-    onlineUser.isRequest = false;
-    onlineUser.requestAccNo = 0;
-    onlineUser.requestAmount = 0;
-    setItem(onlineUser);
-    navbarDatas();
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const users = await getUsers();
+    console.log(users);
+    const onlineUser = onlineUsers(users);
+    navbarDatas(onlineUser);
+    evenListeners(users, onlineUser);
+    isThereRequest(users, onlineUser);
+  } catch (error) {
+    console.error(error.message);
   }
 
+  async function isThereRequest(users, onlineUser) {
+    try {
+      const hisName = 'a';
+      const requestAmount = parseFloat(onlineUser.requestAmount);
+      const hisAccNo = onlineUser.requestAccNo; // who wants money
 
+      if (onlineUser.isRequest) {
+        if (confirm(`The user numbered ${hisAccNo} has sent you a ${requestAmount}$ money request.\nPress Ok or Cancel`)) {
+          if (onlineUser.balance < requestAmount) {
+            alert('Insufficient balance !!');
+          } else {
+            transferOrRequest(users, onlineUser, requestAmount, hisName, hisAccNo);
+            onlineUser.balance -= requestAmount;
+            await updateUser(onlineUser.id, onlineUser);
+          }
+        }
+      }
+      onlineUser.isRequest = false;
+      onlineUser.requestAccNo = 0;
+      onlineUser.requestAmount = 0;
+      await updateUser(onlineUser.id, onlineUser);
+      navbarDatas(onlineUser);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
-  function navbarDatas() {
-    const onlineUser = onlineUsers();
+  function onlineUsers(users) {
+    try {
+      return users.find(user => user.online);
+    } catch (error) {
+      console.error(error.message);
+      throw error;
+    }
+  }
+
+  async function updateUser(userId, newData) {
+    try {
+      const response = await fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+      const updatedUser = await response.json();
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async function getUsers() {
+    try {
+      const response = await fetch('http://localhost:3000/users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching users from db:', error);
+      throw error;
+    }
+  }
+
+  function navbarDatas(onlineUser) {
     accNoDiv.textContent = `Account No: ${onlineUser.accountNo}`;
     balanceDiv.innerText = `Balance: ${onlineUser.balance} $`;
   }
 
-
-  // get online user obj 
-  function onlineUsers() {
-    const users = getItem();
-    const onlineUser = users.filter(user => user.online)[0];   // gives obj
-    return onlineUser;
-  }
-
-
-  // get item from local storage
-  function getItem() {
-    return JSON.parse(localStorage.getItem('userInfos'));
-  }
-
-
-  // set item to local storage
-  function setItem(user) {          // for online user or for requesting money user
-    const users = getItem();
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].accountNo === user.accountNo) {
-        users[i] = user;
-      }
-    }
-    localStorage.setItem('userInfos', JSON.stringify(users));
-    navbarDatas();
-  }
-
-
-  let buttonForInvestingClicked = false;
-  let buttonForWithdrawingClicked = false;
-  let buttonForTransferingClicked = false;
-  let buttonForRequestingClicked = false;
-
-  // Event Listeners
-  function evenListeners() {
+  function evenListeners(users, onlineUser) {
     transactionButtons.forEach((button) => {
       button.addEventListener("click", (e) => {
         const targetClassList = e.target.classList;
@@ -86,27 +100,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (targetClassList.contains('invest-btn')) {
           choosingText.innerText = 'INVEST MONEY';
-          buttonForInvestingClicked = true;
-          buttonForWithdrawingClicked = false;
-          htmlInvestAndWithdraw();
+          htmlInvestAndWithdraw(onlineUser, true);
 
         } else if (targetClassList.contains('withdraw-btn')) {
           choosingText.innerText = 'WITHDRAW MONEY';
-          buttonForInvestingClicked = false;
-          buttonForWithdrawingClicked = true;
-          htmlInvestAndWithdraw();
+          htmlInvestAndWithdraw(onlineUser, false);
 
         } else if (targetClassList.contains('transfer-btn')) {
           choosingText.innerText = 'TRANSFER MONEY TO ANOTHER ACCOUNT';
-          buttonForTransferingClicked = true;
-          buttonForRequestingClicked = false;
-          htmlTransferAndRequest();
+          htmlTransferAndRequest(users, onlineUser, true);
 
         } else if (targetClassList.contains('request-btn')) {
           choosingText.innerText = 'REQUEST MONEY FROM ANOTHER ACCOUNT';
-          buttonForTransferingClicked = false;
-          buttonForRequestingClicked = true;
-          htmlTransferAndRequest();
+          htmlTransferAndRequest(users, onlineUser, false);
 
         } else if (targetClassList.contains('sign-out-btn')) {
           signOut();
@@ -115,10 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
-
-  // Invest or withdraw money 
-  function htmlInvestAndWithdraw() {
+  function htmlInvestAndWithdraw(onlineUser, isInvest) {
     const investingOrWithdrawingMoneyDiv = document.createElement('div');
     investingOrWithdrawingMoneyDiv.setAttribute('id', 'investingOrWithdrawingDiv');
     choosingBank.appendChild(investingOrWithdrawingMoneyDiv);
@@ -136,7 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
     nameInput.classList.add("nameInput", "input");
     nameDiv.appendChild(nameInput);
 
-
     const moneyDiv = document.createElement('div');
     moneyDiv.setAttribute('id', 'moneyDiv');
     investingOrWithdrawingMoneyDiv.appendChild(moneyDiv);
@@ -148,60 +150,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const moneyInput = document.createElement('input');
     moneyInput.classList.add("moneyInput", "input");
+    moneyInput.setAttribute("type", "number");
     moneyDiv.appendChild(moneyInput);
 
+    const applyButton = document.createElement('button');
+    applyButton.classList.add('apply-btn', isInvest ? 'apply-invest' : 'apply-withdraw');
+    applyButton.innerText = 'Apply'
+    investingOrWithdrawingMoneyDiv.appendChild(applyButton);
 
-    if (buttonForInvestingClicked) {
-      const applyButtonForInvesting = document.createElement('button');
-      applyButtonForInvesting.classList.add('apply-btn', 'apply-invest');
-      applyButtonForInvesting.innerText = 'Apply'
-      investingOrWithdrawingMoneyDiv.appendChild(applyButtonForInvesting);
-
-      applyButtonForInvesting.addEventListener('click', (e) => {
-        const inputMoney = parseFloat(moneyInput.value);
-        sumOrSubstraction(inputMoney);
-      });
-    }
-
-    if (buttonForWithdrawingClicked) {
-      const applyButtonForWithdrawing = document.createElement('button');
-      applyButtonForWithdrawing.classList.add('apply-btn', 'apply-withdraw');
-      applyButtonForWithdrawing.innerText = 'Apply'
-      investingOrWithdrawingMoneyDiv.appendChild(applyButtonForWithdrawing);
-
-      applyButtonForWithdrawing.addEventListener('click', () => {
-        const user = onlineUsers();
-        if (user.balance < moneyInput.value) {
-          alert('Insufficient balance !!');
-          return;
-        }
-        const inputMoney = - parseFloat(moneyInput.value);
-        sumOrSubstraction(inputMoney);
-      });
-    }
-
-
-    function sumOrSubstraction(inputMoney) {
-      const user = onlineUsers();
-      let currentBalance = parseFloat(user.balance);
-      const inputName = nameInput.value;
-      if (!inputName || !inputMoney) {
+    applyButton.addEventListener('click', () => {
+      let inputMoney = parseFloat(moneyInput.value);
+      let currentBalance = parseFloat(onlineUser.balance);
+      if (!nameInput.value || !inputMoney) {
         alert('Please fill the form correctly');
         return;
       }
-      currentBalance += inputMoney;
-      user.balance = currentBalance;
-      setItem(user)
-      nameInput.value = '';
-      moneyInput.value = '';
-    }
-
+      if (isInvest) {
+        currentBalance += inputMoney;
+      } else {
+        if (currentBalance < inputMoney) {
+          alert('Insufficient balance !!');
+          return;
+        }
+        currentBalance -= inputMoney;
+      }
+      onlineUser.balance = currentBalance;
+      updateUser(onlineUser.id, onlineUser)
+        .then(() => {
+          nameInput.value = '';
+          moneyInput.value = '';
+        })
+        .catch(error => console.error(error.message));
+    });
   }
 
-
-
-  // Transfer to or request money from other accounts
-  function htmlTransferAndRequest() {
+  function htmlTransferAndRequest(users, onlineUser, isTransfer) {
     const transferingOrRequestingMoneyDiv = document.createElement('div');
     transferingOrRequestingMoneyDiv.setAttribute('id', 'transferingOrRequestingDiv');
     choosingBank.appendChild(transferingOrRequestingMoneyDiv);
@@ -212,13 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nameLabel2 = document.createElement('label');
     nameLabel2.setAttribute('id', 'nameLabel2');
-    nameLabel2.innerText = 'His/Her Name : ';
+    nameLabel2.innerText = isTransfer ? 'His/Her Name : ' : 'Your Name : ';
     nameDiv2.appendChild(nameLabel2);
 
     const nameInput2 = document.createElement('input');
     nameInput2.classList.add("nameInput2", "input");
     nameDiv2.appendChild(nameInput2);
-
 
     const moneyDiv2 = document.createElement('div');
     moneyDiv2.setAttribute('id', 'moneyDiv2');
@@ -231,8 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const moneyInput2 = document.createElement('input');
     moneyInput2.classList.add("moneyInput2", "input");
+    moneyInput2.setAttribute("type", "number");
     moneyDiv2.appendChild(moneyInput2);
-
 
     const accNoDiv = document.createElement('div');
     accNoDiv.setAttribute('id', 'accNoDiv');
@@ -245,122 +227,122 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const accNoInput = document.createElement('input');
     accNoInput.classList.add("accNoInput", "input");
+    accNoInput.setAttribute("type", "number");
     accNoDiv.appendChild(accNoInput);
 
 
-    if (buttonForTransferingClicked) {
+    if (isTransfer) {
       const applyButtonForTransfering = document.createElement('button');
       applyButtonForTransfering.classList.add('apply-btn', 'apply-transfer');
       applyButtonForTransfering.innerText = 'Apply'
       transferingOrRequestingMoneyDiv.appendChild(applyButtonForTransfering);
 
-      applyButtonForTransfering.addEventListener('click', (e) => {
-        const user = onlineUsers();
-        if (user.balance < moneyInput2.value) {
-          alert('Insufficient balance !!');
-          return;
-        }
-        const inputMoney = - parseFloat(moneyInput2.value);
-        transferOrRequest(inputMoney, nameInput2.value, accNoInput.value);
+      applyButtonForTransfering.addEventListener('click', () => {
+        const inputMoney = parseFloat(moneyInput2.value);
+        const accNo = Number(accNoInput.value);
+        transferOrRequest(users, onlineUser, inputMoney, nameInput2.value, accNo, isTransfer);
         nameInput2.value = '';
         moneyInput2.value = '';
         accNoInput.value = '';
       });
-    }
-
-    if (buttonForRequestingClicked) {
+    } else {
       const applyButtonForRequesting = document.createElement('button');
       applyButtonForRequesting.classList.add('apply-btn', 'apply-request');
       applyButtonForRequesting.innerText = 'Apply'
       transferingOrRequestingMoneyDiv.appendChild(applyButtonForRequesting);
 
       applyButtonForRequesting.addEventListener('click', () => {
-        transferOrRequest(moneyInput2.value, nameInput2.value, accNoInput.value);   
+        const inputMoney = parseFloat(moneyInput2.value);
+        const accNo = Number(accNoInput.value);
+        transferOrRequest(users, onlineUser, inputMoney, nameInput2.value, accNo, isTransfer);
       });
     }
   }
 
 
-  function transferOrRequest(inputMoney, inputName, accNo) {
-    const users = getItem();
-    const user = onlineUsers();
-
-    let currentBalance = parseFloat(user.balance);
+  function transferOrRequest(users, onlineUser, inputMoney, inputName, accNo, isTransfer) {
+    let currentBalance = parseFloat(onlineUser.balance);
 
     if (!inputName || !inputMoney || !accNo) {
       alert('Please fill the form correctly');
       return;
     }
+    console.log(accNo)
+    const matchingUser = users.find(user => user.accountNo === accNo);
 
-    const matchingUser = users.filter(user => user.accountNo == accNo)[0];   // double equal sign
     if (!matchingUser) {
       alert('This account number is not found in the system');
       return;
     }
-    else if (matchingUser.accountNo === user.accountNo) {
+    if (matchingUser.accountNo === onlineUser.accountNo) {
       alert('You cannot send money to yourself');
+      return;
     }
-    else {
-      if (user.isRequest) {
-        matchingUser.balance += inputMoney;   // money input was negative in applyButtonForTransfering clicking
-        setItem(matchingUser);
+
+    if (onlineUser.isRequest) {
+      matchingUser.balance += inputMoney;
+      updateUser(matchingUser.id, matchingUser);
+    }
+
+    if (!onlineUser.isRequest && isTransfer) {
+      if (inputMoney > 0) {
+        if (currentBalance < inputMoney) {
+          alert('Insufficient balance !!');
+          return;
+        }
+        currentBalance -= inputMoney;
       }
 
-      if (!user.isRequest && buttonForTransferingClicked) {
-        currentBalance += inputMoney;
-        user.balance = currentBalance;
-        matchingUser.balance += - inputMoney;   // money input was negative in applyButtonForTransfering clicking
-        setItem(matchingUser);
-        setItem(user);
-
-      } else if (!user.isRequest && buttonForRequestingClicked) {
+      onlineUser.balance = currentBalance;
+      matchingUser.balance += inputMoney;
+      updateUser(matchingUser.id, matchingUser);
+      updateUser(onlineUser.id, onlineUser)
+        .then(() => {
+          if (!onlineUser.isRequest) {
+            alert(`${inputMoney}$ ${inputMoney > 0 ? 'transferred to' : 'requested from'} the user numbered ${matchingUser.accountNo}`);
+          }
+        })
+        .catch(error => console.error(error.message));
+    } else if(!onlineUser.isRequest && !isTransfer) {
+      if(inputMoney > 0) {
         matchingUser.isRequest = true;
+        matchingUser.requestAccNo = onlineUser.accountNo;
         matchingUser.requestAmount = inputMoney;
-        matchingUser.requestAccNo = user.accountNo;
-        setItem(matchingUser);
-        alert(`${inputMoney}$ request's been sent to the user numbered ${accNo}`);
+        updateUser(matchingUser.id, matchingUser)
+           .then(() => {
+               alert(`${inputMoney}$ 'requested from' the user numbered ${matchingUser.accountNo}`);
+           })
       }
-
     }
   }
 
-
-
-
-  // Exit
-  function signOut() {
-    window.location.href = '../login/index.html';  // or  window.history.back();
-    const onlineUser = onlineUsers();
+  async function signOut() {
+    const users = await getUsers();
+    const onlineUser = await onlineUsers(users);
     onlineUser.online = false;
-    setItem(onlineUser);
+    await updateUser(onlineUser.id, onlineUser)
+      .catch(error => console.error(error.message));
+    window.location.href = '../login/index.html';  
   }
+  
 
-
-
-
-  // Advertisement
   const images = document.getElementById('images');
   const a = document.getElementById('a-tag');
   let i = 0;
   setInterval(() => {
-    if (i === 0) {
-      images.setAttribute('src', './img/Galaxy S23.jpg');
-      a.setAttribute('href', 'https://www.samsung.com/us/smartphones/galaxy-s23/buy/galaxy-s23-256gb-unlocked-sm-s911uzkexaa/')
-    } else if (i === 1) {
-      images.setAttribute('src', './img/Galaxy Z Fold3 5G.jpg')
-      a.setAttribute('href', 'https://www.samsung.com/us/smartphones/galaxy-z-fold3-5g/buy/galaxy-z-fold3-5g-256gb-unlocked-sm-f926uzkaxaa/?modelCode=SM-F926UZKAXAA');
-    } else if (i === 2) {
-      images.setAttribute('src', './img/Galaxy S21 Ultra 5G.jpg')
-      a.setAttribute('href', 'https://www.samsung.com/us/smartphones/galaxy-s-series/certified-re-newed-store/buy/?modelCode=SM5G998UZKAXAA')
-    } else if (i === 3) {
-      images.setAttribute('src', './img/Galaxy S22 Ultra.jpg')
-      a.setAttribute('href', 'https://www.samsung.com/us/smartphones/galaxy-s22-ultra/buy/galaxy-s22-ultra-128gb-unlocked-sm-s908udraxaa/?modelCode=SM-S908UZREXAA');
+    const imageSources = ['./img/Galaxy S23.jpg', './img/Galaxy Z Fold3 5G.jpg', './img/Galaxy S21 Ultra 5G.jpg', './img/Galaxy S22 Ultra.jpg'];
+    const links = [
+      'https://www.samsung.com/us/smartphones/galaxy-s23/buy/galaxy-s23-256gb-unlocked-sm-s911uzkexaa/',
+      'https://www.samsung.com/us/smartphones/galaxy-z-fold3-5g/buy/galaxy-z-fold3-5g-256gb-unlocked-sm-f926uzkaxaa/?modelCode=SM-F926UZKAXAA',
+      'https://www.samsung.com/us/smartphones/galaxy-s-series/certified-re-newed-store/buy/?modelCode=SM5G998UZKAXAA',
+      'https://www.samsung.com/us/smartphones/galaxy-s22-ultra/buy/galaxy-s22-ultra-128gb-unlocked-sm-s908udraxaa/?modelCode=SM-S908UZREXAA'
+    ];
+    if (i === 4) {
+      i = 0;
     }
-    if (i === 3) {
-      i = -1;
-    }
+    images.setAttribute('src', imageSources[i]);
+    a.setAttribute('href', links[i]);
     i++;
   }, 2000);
 
 });
-
